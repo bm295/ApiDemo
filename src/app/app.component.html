@@ -1,0 +1,59 @@
+<main class="container">
+  <header>
+    <h1>🎯 Goal Tracker AI</h1>
+    <p>AI theo dõi tiến độ, phân tích thói quen và nhắc nhở thông minh.</p>
+  </header>
+
+  <section class="panel">
+    <h2>Mục tiêu chính</h2>
+    <input [(ngModel)]="goal.title" placeholder="Nhập mục tiêu lớn của bạn" />
+    <button (click)="generateTasks()">Chia mục tiêu thành task nhỏ</button>
+    <p class="desc">{{ goal.description }}</p>
+  </section>
+
+  <section class="panel">
+    <h2>Danh sách task tự động</h2>
+    <ul>
+      <li *ngFor="let task of goal.tasks; index as i">
+        <label>
+          <input type="checkbox" [checked]="task.done" (change)="toggleTask(i)" />
+          <span [class.done]="task.done">{{ task.title }}</span>
+        </label>
+      </li>
+    </ul>
+  </section>
+
+  <section class="panel grid">
+    <article>
+      <h3>Báo cáo tiến độ</h3>
+      <div class="progress">
+        <div class="bar" [style.width.%]="progress"></div>
+      </div>
+      <strong>{{ progress }}% hoàn thành</strong>
+    </article>
+
+    <article>
+      <h3>Phân tích trì hoãn</h3>
+      <p>{{ analysis }}</p>
+    </article>
+
+    <article>
+      <h3>Điều chỉnh kế hoạch</h3>
+      <p>{{ adjustment }}</p>
+    </article>
+  </section>
+
+  <section class="panel pricing">
+    <h2>Mô hình kiếm tiền</h2>
+    <div class="plans">
+      <div>
+        <h3>Freemium</h3>
+        <p>Quản lý tối đa 2 mục tiêu + báo cáo cơ bản</p>
+      </div>
+      <div class="premium">
+        <h3>Premium</h3>
+        <p>49k–99k/tháng: AI phân tích sâu, nhắc nhở thông minh, tối ưu kế hoạch theo dữ liệu thực tế.</p>
+      </div>
+    </div>
+  </section>
+</main>

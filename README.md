@@ -1,24 +1,20 @@
-# Tây Du Ký - 81 Nạn Kiếp
+# Goal Tracker AI (Angular 19)
 
-Game mô phỏng hành trình thỉnh kinh với **81 màn chơi**, mỗi màn là một nạn kiếp. Người chơi phải **thắng từng màn** để mở khóa màn tiếp theo.
+Ứng dụng Angular 19 mô phỏng phần mềm **AI quản lý mục tiêu cá nhân** theo mô hình Freemium + Premium.
 
 ## Tính năng
-- **New Game**: bắt đầu hành trình mới từ màn 1.
-- **Load Game**: tải tiến trình đã lưu.
-- **Save Game**: lưu tiến trình tại vị trí tùy chọn.
-- **81 màn chơi** theo thứ tự, phải thắng mới qua màn.
 
-## Chạy game
-Yêu cầu: Python 3.10+.
+- Chia mục tiêu lớn thành task nhỏ tự động (AI breakdown).
+- Phân tích lý do trì hoãn dựa trên lịch sử hoàn thành task.
+- Báo cáo tiến độ trực quan theo % hoàn thành.
+- Gợi ý điều chỉnh kế hoạch khi chậm tiến độ.
+- Gợi ý gói Premium: 49k–99k/tháng.
+
+## Chạy dự án
 
 ```bash
-python game_tay_du_ky.py
+npm install
+npm run start
 ```
 
-## Lưu/Load
-- Khi chọn **Save Game**, bạn có thể nhập đường dẫn bất kỳ (ví dụ: `saves/hanh_gia.json`).
-- Khi chọn **Load Game**, nhập đường dẫn đến file save đã lưu.
-
-## Cấu trúc
-- `game_tay_du_ky.py`: mã nguồn game chính.
-- `Archived/`: các file cũ đã được lưu trữ.
+Mở `http://localhost:4200`.
