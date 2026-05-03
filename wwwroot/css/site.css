@@ -1,0 +1,7 @@
+body { font-family: Arial, sans-serif; margin: 0; background: #fafafa; color: #222; }
+header { background: #1f2937; color: white; padding: 1rem; }
+nav a { color: #93c5fd; text-decoration: none; }
+main { padding: 1rem 2rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.card { display: block; background: white; border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; text-align: center; text-decoration: none; color: #111; font-weight: bold; }
+pre { background: #111827; color: #e5e7eb; padding: 1rem; border-radius: 8px; overflow-x: auto; }
