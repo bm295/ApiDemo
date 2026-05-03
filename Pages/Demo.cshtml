@@ -6,4 +6,22 @@
 
 <h2>@Model.Title</h2>
 <p>@Model.Description</p>
-<pre>@Model.Example</pre>
+@if (Model.IsRestDemo)
+{
+    <p><strong>Why REST is stateless:</strong> @Model.RestStatelessNote</p>
+    <p><strong>Uniform Interface:</strong> @Model.RestUniformInterfaceNote</p>
+    <pre>@Model.RestUniformInterfaceExample</pre>
+    <p>
+        Method:
+        <a asp-page="/Demo" asp-route-id="rest" asp-route-method="GET">GET</a> |
+        <a asp-page="/Demo" asp-route-id="rest" asp-route-method="POST">POST</a>
+    </p>
+    <h3>Request (@Model.SelectedMethod)</h3>
+    <pre>@Model.RestRequestExample</pre>
+    <h3>Response (@Model.SelectedMethod)</h3>
+    <pre>@Model.RestResponseExample</pre>
+}
+else
+{
+    <pre>@Model.Example</pre>
+}
