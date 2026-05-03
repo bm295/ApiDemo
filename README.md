@@ -1,20 +1,18 @@
-# Goal Tracker AI (Angular 19)
+# API Demo Hub (C# ASP.NET Core)
 
-Ứng dụng Angular 19 mô phỏng phần mềm **AI quản lý mục tiêu cá nhân** theo mô hình Freemium + Premium.
+This repository is rewritten as a C# web application that demonstrates multiple API styles:
+- REST
+- SOAP
+- gRPC (conceptual demo page)
+- GraphQL
+- Webhook
+- WebSocket
 
-## Tính năng
-
-- Chia mục tiêu lớn thành task nhỏ tự động (AI breakdown).
-- Phân tích lý do trì hoãn dựa trên lịch sử hoàn thành task.
-- Báo cáo tiến độ trực quan theo % hoàn thành.
-- Gợi ý điều chỉnh kế hoạch khi chậm tiến độ.
-- Gợi ý gói Premium: 49k–99k/tháng.
-
-## Chạy dự án
+## Run
 
 ```bash
-npm install
-npm run start
+dotnet restore
+dotnet run
 ```
 
-Mở `http://localhost:4200`.
+Open the app and choose an API type from the home page.
