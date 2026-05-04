@@ -21,6 +21,26 @@
     <h3>Response (@Model.SelectedMethod)</h3>
     <pre>@Model.RestResponseExample</pre>
 }
+else if (Model.IsGraphQlDemo)
+{
+    <p>
+        Example:
+        <a asp-page="/Demo" asp-route-id="graphql" asp-route-example="1">Example 1 (schema introspection)</a> |
+        <a asp-page="/Demo" asp-route-id="graphql" asp-route-example="2">Example 2 (schema validation error)</a>
+    </p>
+    <h3>Request (Example @Model.SelectedGraphQlExample)</h3>
+    <pre>@Model.GraphQlRequestExample</pre>
+    <h3>Response (Example @Model.SelectedGraphQlExample)</h3>
+    <pre>@Model.GraphQlResponseExample</pre>
+}
+else if (Model.IsGrpcDemo)
+{
+    <p><strong>Why gRPC is high performance:</strong> @Model.GrpcHighPerformanceNote</p>
+    <h3>Request</h3>
+    <pre>@Model.GrpcRequestExample</pre>
+    <h3>Response</h3>
+    <pre>@Model.GrpcResponseExample</pre>
+}
 else
 {
     <pre>@Model.Example</pre>
