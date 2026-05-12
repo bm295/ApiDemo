@@ -1,0 +1,19 @@
+syntax = "proto3";
+option csharp_namespace = "FunctionalProgramming.Grpc";
+
+package api_catalog;
+
+service ApiCatalog {
+  rpc GetApiTypes (ApiRequest) returns (ApiReply);
+}
+
+message ApiRequest {}
+
+message ApiType {
+  string name = 1;
+  string use_case = 2;
+}
+
+message ApiReply {
+  repeated ApiType items = 1;
+}

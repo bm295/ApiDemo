@@ -38,8 +38,39 @@ else if (Model.IsGrpcDemo)
     <p><strong>Why gRPC is high performance:</strong> @Model.GrpcHighPerformanceNote</p>
     <h3>Request</h3>
     <pre>@Model.GrpcRequestExample</pre>
+    <button id="grpc-send-btn" type="button">Send real gRPC request</button>
     <h3>Response</h3>
-    <pre>@Model.GrpcResponseExample</pre>
+    <pre id="grpc-response">@Model.GrpcResponseExample</pre>
+
+    <script>
+        (function () {
+            const button = document.getElementById('grpc-send-btn');
+            const responseBlock = document.getElementById('grpc-response');
+
+            if (!button || !responseBlock) {
+                return;
+            }
+
+            button.addEventListener('click', async function () {
+                responseBlock.textContent = 'Loading real gRPC response...';
+                try {
+                    const response = await fetch('/api/grpc/request', {
+                        method: 'POST'
+                    });
+
+                    if (!response.ok) {
+                        responseBlock.textContent = `Request failed: ${response.status} ${response.statusText}`;
+                        return;
+                    }
+
+                    const payload = await response.json();
+                    responseBlock.textContent = JSON.stringify(payload, null, 2);
+                } catch (error) {
+                    responseBlock.textContent = `Request failed: ${error}`;
+                }
+            });
+        })();
+    </script>
 }
 else
 {
