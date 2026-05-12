@@ -4,11 +4,12 @@
 }
 
 <h2>Choose an API type to view demo details</h2>
+<p>Ordered left to right by contract strictness (strict → loose).</p>
 <div class="grid">
-    <a class="card" asp-page="/Demo" asp-route-id="rest">REST</a>
     <a class="card" asp-page="/Demo" asp-route-id="soap">SOAP</a>
     <a class="card" asp-page="/Demo" asp-route-id="grpc">gRPC</a>
     <a class="card" asp-page="/Demo" asp-route-id="graphql">GraphQL</a>
+    <a class="card" asp-page="/Demo" asp-route-id="rest">REST</a>
     <a class="card" asp-page="/Demo" asp-route-id="webhook">Webhook</a>
     <a class="card" asp-page="/Demo" asp-route-id="websocket">WebSocket</a>
 </div>
