@@ -1,8 +1,8 @@
+using System.Text.Json.Nodes;
+
 namespace FunctionalProgramming.Models;
 
-public record ApiMessage(int Id, string Text, DateTime CreatedUtc);
-
-public record ApiMessageInput(string Text);
+public sealed record ApiMessage(int Id, string Text, DateTime CreatedUtc, JsonObject Attributes);
 
 public class GraphQlRequest
 {

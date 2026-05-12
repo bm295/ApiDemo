@@ -14,7 +14,8 @@
     <p>
         Method:
         <a asp-page="/Demo" asp-route-id="rest" asp-route-method="GET">GET</a> |
-        <a asp-page="/Demo" asp-route-id="rest" asp-route-method="POST">POST</a>
+        <a asp-page="/Demo" asp-route-id="rest" asp-route-method="POST">POST</a> |
+        <a asp-page="/Demo" asp-route-id="rest" asp-route-method="PUT">PUT</a>
     </p>
     <h3>Request (@Model.SelectedMethod)</h3>
     <pre>@Model.RestRequestExample</pre>
@@ -35,26 +36,34 @@ else if (Model.IsGraphQlDemo)
 }
 else if (Model.IsGrpcDemo)
 {
-    <p><strong>Why gRPC is high performance:</strong> @Model.GrpcHighPerformanceNote</p>
+    <p><strong>Self-documenting contracts:</strong> @Model.GrpcHighPerformanceNote</p>
     <h3>Request</h3>
     <pre>@Model.GrpcRequestExample</pre>
-    <button id="grpc-send-btn" type="button">Send real gRPC request</button>
+    <button class="grpc-send-btn" type="button" data-endpoint="/api/grpc/v1/request">Send v1 gRPC request</button>
+    <button class="grpc-send-btn" type="button" data-endpoint="/api/grpc/v2/request">Send v2 gRPC request</button>
     <h3>Response</h3>
     <pre id="grpc-response">@Model.GrpcResponseExample</pre>
 
     <script>
         (function () {
-            const button = document.getElementById('grpc-send-btn');
+            const buttons = document.querySelectorAll('.grpc-send-btn');
             const responseBlock = document.getElementById('grpc-response');
 
-            if (!button || !responseBlock) {
+            if (buttons.length === 0 || !responseBlock) {
                 return;
             }
 
-            button.addEventListener('click', async function () {
+            buttons.forEach(function (button) {
+                button.addEventListener('click', async function () {
+                    const endpoint = button.getAttribute('data-endpoint');
+                    await sendGrpcRequest(endpoint);
+                });
+            });
+
+            async function sendGrpcRequest(endpoint) {
                 responseBlock.textContent = 'Loading real gRPC response...';
                 try {
-                    const response = await fetch('/api/grpc/request', {
+                    const response = await fetch(endpoint, {
                         method: 'POST'
                     });
 
@@ -68,7 +77,7 @@ else if (Model.IsGrpcDemo)
                 } catch (error) {
                     responseBlock.textContent = `Request failed: ${error}`;
                 }
-            });
+            }
         })();
     </script>
 }

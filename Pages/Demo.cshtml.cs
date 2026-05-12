@@ -32,7 +32,7 @@ public class DemoModel : PageModel
         var selectedMethod = (method ?? "GET").ToUpperInvariant();
         var selectedGraphQlExample = (example ?? "1").Trim();
 
-        if (selectedMethod is not ("GET" or "POST"))
+        if (selectedMethod is not ("GET" or "POST" or "PUT"))
         {
             selectedMethod = "GET";
         }

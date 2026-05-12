@@ -3,21 +3,133 @@ using Grpc.Core;
 
 namespace FunctionalProgramming.Services.Grpc;
 
-public sealed class ApiCatalogGrpcService : ApiCatalog.ApiCatalogBase
+public sealed class ApiCatalogV1GrpcService : ApiCatalogV1.ApiCatalogV1Base
 {
-    public override Task<ApiReply> GetApiTypes(ApiRequest request, ServerCallContext context)
+    public override Task<ListApiCatalogEntriesV1Response> ListCatalogEntries(
+        ListApiCatalogEntriesV1Request request,
+        ServerCallContext context)
     {
-        var reply = new ApiReply();
-        reply.Items.AddRange(
+        ApiCatalogContract.EnsureValidRequest(request);
+
+        var response = new ListApiCatalogEntriesV1Response
+        {
+            Metadata = ApiCatalogContract.CreateV1Metadata()
+        };
+
+        response.CatalogEntries.AddRange(
         [
-            new ApiType { Name = "REST", UseCase = "Resource CRUD over HTTP" },
-            new ApiType { Name = "SOAP", UseCase = "Contract-first enterprise integration" },
-            new ApiType { Name = "gRPC", UseCase = "Fast binary service-to-service calls" },
-            new ApiType { Name = "GraphQL", UseCase = "Flexible client-driven queries" },
-            new ApiType { Name = "Webhook", UseCase = "Server push notifications" },
-            new ApiType { Name = "WebSocket", UseCase = "Realtime two-way communication" }
+            new ApiCatalogEntryV1
+            {
+                EntryKind = ApiCatalogEntryKindV1.Rest,
+                DisplayName = "REST",
+                IntegrationUseCase = "Resource CRUD over HTTP"
+            },
+            new ApiCatalogEntryV1
+            {
+                EntryKind = ApiCatalogEntryKindV1.Soap,
+                DisplayName = "SOAP",
+                IntegrationUseCase = "Contract-first enterprise integration"
+            },
+            new ApiCatalogEntryV1
+            {
+                EntryKind = ApiCatalogEntryKindV1.Grpc,
+                DisplayName = "gRPC",
+                IntegrationUseCase = "Fast binary service-to-service calls"
+            },
+            new ApiCatalogEntryV1
+            {
+                EntryKind = ApiCatalogEntryKindV1.Graphql,
+                DisplayName = "GraphQL",
+                IntegrationUseCase = "Flexible client-driven queries"
+            },
+            new ApiCatalogEntryV1
+            {
+                EntryKind = ApiCatalogEntryKindV1.Webhook,
+                DisplayName = "Webhook",
+                IntegrationUseCase = "Server push notifications"
+            },
+            new ApiCatalogEntryV1
+            {
+                EntryKind = ApiCatalogEntryKindV1.Websocket,
+                DisplayName = "WebSocket",
+                IntegrationUseCase = "Realtime two-way communication"
+            }
         ]);
 
-        return Task.FromResult(reply);
+        ApiCatalogContract.EnsureValidReply(response);
+
+        return Task.FromResult(response);
+    }
+}
+
+public sealed class ApiCatalogV2GrpcService : ApiCatalogV2.ApiCatalogV2Base
+{
+    public override Task<ListApiCatalogEntriesV2Response> ListCatalogEntries(
+        ListApiCatalogEntriesV2Request request,
+        ServerCallContext context)
+    {
+        ApiCatalogContract.EnsureValidRequest(request);
+
+        var response = new ListApiCatalogEntriesV2Response
+        {
+            Metadata = ApiCatalogContract.CreateV2Metadata()
+        };
+
+        response.CatalogEntries.AddRange(
+        [
+            new ApiCatalogEntryV2
+            {
+                EntryKind = ApiCatalogEntryKindV2.Rest,
+                DisplayName = "REST",
+                IntegrationUseCase = "Resource CRUD over HTTP",
+                LifecycleStatus = "stable"
+            },
+            new ApiCatalogEntryV2
+            {
+                EntryKind = ApiCatalogEntryKindV2.Soap,
+                DisplayName = "SOAP",
+                IntegrationUseCase = "Contract-first enterprise integration",
+                LifecycleStatus = "stable"
+            },
+            new ApiCatalogEntryV2
+            {
+                EntryKind = ApiCatalogEntryKindV2.Grpc,
+                DisplayName = "gRPC",
+                IntegrationUseCase = "Fast binary service-to-service calls",
+                LifecycleStatus = "stable"
+            },
+            new ApiCatalogEntryV2
+            {
+                EntryKind = ApiCatalogEntryKindV2.Graphql,
+                DisplayName = "GraphQL",
+                IntegrationUseCase = "Flexible client-driven queries",
+                LifecycleStatus = "stable"
+            },
+            new ApiCatalogEntryV2
+            {
+                EntryKind = ApiCatalogEntryKindV2.Webhook,
+                DisplayName = "Webhook",
+                IntegrationUseCase = "Server push notifications",
+                LifecycleStatus = "stable"
+            },
+            new ApiCatalogEntryV2
+            {
+                EntryKind = ApiCatalogEntryKindV2.Websocket,
+                DisplayName = "WebSocket",
+                IntegrationUseCase = "Realtime two-way communication",
+                LifecycleStatus = "stable"
+            },
+            new ApiCatalogEntryV2
+            {
+                EntryKind = ApiCatalogEntryKindV2.Asyncapi,
+                DisplayName = "AsyncAPI",
+                IntegrationUseCase = "Event driven schema governance",
+                LifecycleStatus = "emerging"
+            }
+        ]);
+
+        ApiCatalogContract.EnsureValidReply(response);
+
+        return Task.FromResult(response);
     }
 }

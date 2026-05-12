@@ -7,58 +7,102 @@ public sealed class GrpcDemoPageHandler : IApiDemoPageHandler
     public void Apply(DemoModel model, string method, string example)
     {
         model.Title = "gRPC Demo";
-        model.Description = "gRPC is contract-first: define service and message schema in a .proto file first, then generate server/client code from that contract.";
+        model.Description = "gRPC is contract-first: define versioned services, operation-specific request and response types, governed values, and field-level semantics in the .proto schema, then generate the integration code directly from that contract.";
         model.IsGrpcDemo = true;
-        model.GrpcHighPerformanceNote = "gRPC has native streaming over HTTP/2: client-streaming, server-streaming, and bidirectional streaming are first-class RPC patterns in the contract.";
+        model.GrpcHighPerformanceNote = "This contract is also build-verified. `dotnet build` runs a descriptor-based verifier that fails the build if the generated service names, RPC names, message types, enum values, or strict field rules drift from the governed schema.";
         model.GrpcRequestExample = """
-Contract (.proto) first:
+Documented strict contract (.proto):
 
-syntax = "proto3";
-service ApiCatalog {
-  rpc GetApiTypes (ApiRequest) returns (ApiReply);
-  rpc UploadApiEvents (stream ApiEvent) returns (UploadSummary);          // client streaming
-  rpc WatchApiChanges (ApiRequest) returns (stream ApiChange);            // server streaming
-  rpc ChatApiStatus (stream ApiStatusRequest) returns (stream ApiStatus); // bidirectional streaming
-}
-message ApiRequest {}
-message ApiReply {
-  repeated ApiType items = 1;
-}
-message ApiType {
-  string name = 1;
-  string use_case = 2;
+// Version 1 of the API catalog. This endpoint preserves the original governed value set.
+service ApiCatalogV1 {
+  // Lists the API catalog entries accepted by api-catalog.v1 integrations.
+  rpc ListCatalogEntries (ListApiCatalogEntriesV1Request) returns (ListApiCatalogEntriesV1Response);
 }
 
-Generated client call (concept):
-var reply = await client.GetApiTypesAsync(new ApiRequest());
+// Version 2 of the API catalog. This endpoint evolves the domain while v1 remains available.
+service ApiCatalogV2 {
+  // Lists API catalog entries accepted by api-catalog.v2 integrations, including lifecycle metadata.
+  rpc ListCatalogEntries (ListApiCatalogEntriesV2Request) returns (ListApiCatalogEntriesV2Response);
+}
 
-Streaming calls (concept):
-using var upload = client.UploadApiEvents();
-await upload.RequestStream.WriteAsync(new ApiEvent { Name = "REST" });
-await upload.RequestStream.CompleteAsync();
-var uploadSummary = await upload.ResponseAsync;
+message ListApiCatalogEntriesV2Request {
+  string contract_version = 1 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^api-catalog\\.v2$"
+  ];
 
-using var watch = client.WatchApiChanges(new ApiRequest());
-await foreach (var change in watch.ResponseStream.ReadAllAsync()) { /* receive stream */ }
+  string requesting_client_name = 2 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^[A-Za-z][A-Za-z0-9-]{2,30}$"
+  ];
+}
+
+message ApiCatalogEntryV2 {
+  ApiCatalogEntryKindV2 entry_kind = 1 [(strict_required) = true];
+  string display_name = 2 [(strict_required) = true];
+  string integration_use_case = 3 [(strict_required) = true];
+  string lifecycle_status = 4 [(strict_required) = true];
+}
+
+Generated v1 client call:
+var v1Response = await v1Client.ListCatalogEntriesAsync(new ListApiCatalogEntriesV1Request
+{
+    ContractVersion = "api-catalog.v1"
+});
+
+Generated v2 client call:
+var v2Response = await v2Client.ListCatalogEntriesAsync(new ListApiCatalogEntriesV2Request
+{
+    ContractVersion = "api-catalog.v2",
+    RequestingClientName = "demo-client"
+});
+
+Build-time verification:
+dotnet build
+// MSBuild runs: ApiDemo.dll --verify-grpc-contract
 """;
 
         model.GrpcResponseExample = """
-ApiReply (decoded from Protobuf):
+V1 response stays narrow and explicit:
 {
-  "items": [
-    { "name": "REST", "use_case": "Resource CRUD over HTTP" },
-    { "name": "SOAP", "use_case": "Contract-first enterprise integration" },
-    { "name": "gRPC", "use_case": "Fast binary service-to-service calls" },
-    { "name": "GraphQL", "use_case": "Flexible client-driven queries" },
-    { "name": "Webhook", "use_case": "Server push notifications" },
-    { "name": "WebSocket", "use_case": "Realtime two-way communication" }
+  "metadata": {
+    "contractVersion": "api-catalog.v1",
+    "schemaName": "api_catalog.ApiCatalogV1",
+    "owner": "platform-contracts",
+    "supportedContractVersions": [ "api-catalog.v1" ]
+  },
+  "catalogEntries": [
+    {
+      "entryKind": "API_CATALOG_ENTRY_KIND_V1_REST",
+      "displayName": "REST",
+      "integrationUseCase": "Resource CRUD over HTTP"
+    }
   ]
 }
 
-Streaming response shape (concept):
-- UploadApiEvents -> single UploadSummary after client stream completes.
-- WatchApiChanges -> multiple ApiChange messages over time.
-- ChatApiStatus -> both sides continuously send/receive ApiStatus messages on one connection.
+V2 adds fields whose names explain the intent directly:
+{
+  "metadata": {
+    "contractVersion": "api-catalog.v2",
+    "schemaName": "api_catalog.ApiCatalogV2",
+    "owner": "platform-contracts",
+    "supportedContractVersions": [ "api-catalog.v1", "api-catalog.v2" ]
+  },
+  "catalogEntries": [
+    {
+      "entryKind": "API_CATALOG_ENTRY_KIND_V2_GRPC",
+      "displayName": "gRPC",
+      "integrationUseCase": "Fast binary service-to-service calls",
+      "lifecycleStatus": "stable"
+    },
+    {
+      "entryKind": "API_CATALOG_ENTRY_KIND_V2_ASYNCAPI",
+      "displayName": "AsyncAPI",
+      "integrationUseCase": "Event driven schema governance",
+      "lifecycleStatus": "emerging"
+    }
+  ]
+}
 """;
         model.Example = string.Empty;
     }

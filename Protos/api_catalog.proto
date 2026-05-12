@@ -3,17 +3,250 @@ option csharp_namespace = "FunctionalProgramming.Grpc";
 
 package api_catalog;
 
-service ApiCatalog {
-  rpc GetApiTypes (ApiRequest) returns (ApiReply);
+import "google/protobuf/descriptor.proto";
+
+// Marks a field as mandatory for this strict demo contract.
+extend google.protobuf.FieldOptions {
+  bool strict_required = 51001;
+  string strict_string_pattern = 51002;
+  string strict_semantic_type = 51003;
+  int32 strict_min_items = 51004;
 }
 
-message ApiRequest {}
-
-message ApiType {
-  string name = 1;
-  string use_case = 2;
+// Names the governed contract version for every request, response, and nested type.
+extend google.protobuf.MessageOptions {
+  string strict_contract = 51101;
 }
 
-message ApiReply {
-  repeated ApiType items = 1;
+// Version 1 of the API catalog. This endpoint preserves the original governed value set.
+service ApiCatalogV1 {
+  // Lists the API catalog entries accepted by api-catalog.v1 integrations.
+  rpc ListCatalogEntries (ListApiCatalogEntriesV1Request) returns (ListApiCatalogEntriesV1Response);
+}
+
+// Version 2 of the API catalog. This endpoint evolves the domain while v1 remains available.
+service ApiCatalogV2 {
+  // Lists API catalog entries accepted by api-catalog.v2 integrations, including lifecycle metadata.
+  rpc ListCatalogEntries (ListApiCatalogEntriesV2Request) returns (ListApiCatalogEntriesV2Response);
+}
+
+// Request for ApiCatalogV1.ListCatalogEntries.
+message ListApiCatalogEntriesV1Request {
+  option (strict_contract) = "api-catalog.v1";
+
+  // Exact contract version required from v1 clients.
+  string contract_version = 1 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^api-catalog\\.v1$",
+    (strict_semantic_type) = "contract-version"
+  ];
+}
+
+// Request for ApiCatalogV2.ListCatalogEntries.
+message ListApiCatalogEntriesV2Request {
+  option (strict_contract) = "api-catalog.v2";
+
+  // Exact contract version required from v2 clients.
+  string contract_version = 1 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^api-catalog\\.v2$",
+    (strict_semantic_type) = "contract-version"
+  ];
+
+  // Stable integration name used for contract collaboration and traceability.
+  string requesting_client_name = 2 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^[A-Za-z][A-Za-z0-9-]{2,30}$",
+    (strict_semantic_type) = "integrating-client-name"
+  ];
+}
+
+// Governed API entry identifiers accepted by api-catalog.v1.
+enum ApiCatalogEntryKindV1 {
+  API_CATALOG_ENTRY_KIND_V1_UNSPECIFIED = 0;
+  API_CATALOG_ENTRY_KIND_V1_REST = 1;
+  API_CATALOG_ENTRY_KIND_V1_SOAP = 2;
+  API_CATALOG_ENTRY_KIND_V1_GRPC = 3;
+  API_CATALOG_ENTRY_KIND_V1_GRAPHQL = 4;
+  API_CATALOG_ENTRY_KIND_V1_WEBHOOK = 5;
+  API_CATALOG_ENTRY_KIND_V1_WEBSOCKET = 6;
+}
+
+// Governed API entry identifiers accepted by api-catalog.v2.
+enum ApiCatalogEntryKindV2 {
+  API_CATALOG_ENTRY_KIND_V2_UNSPECIFIED = 0;
+  API_CATALOG_ENTRY_KIND_V2_REST = 1;
+  API_CATALOG_ENTRY_KIND_V2_SOAP = 2;
+  API_CATALOG_ENTRY_KIND_V2_GRPC = 3;
+  API_CATALOG_ENTRY_KIND_V2_GRAPHQL = 4;
+  API_CATALOG_ENTRY_KIND_V2_WEBHOOK = 5;
+  API_CATALOG_ENTRY_KIND_V2_WEBSOCKET = 6;
+  API_CATALOG_ENTRY_KIND_V2_ASYNCAPI = 7;
+}
+
+// Contract metadata returned with every api-catalog.v1 response.
+message ApiCatalogContractMetadataV1 {
+  option (strict_contract) = "api-catalog.v1";
+
+  // Concrete response contract version.
+  string contract_version = 1 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^api-catalog\\.v1$",
+    (strict_semantic_type) = "contract-version"
+  ];
+
+  // Fully qualified service name that owns this response shape.
+  string schema_name = 2 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^api_catalog\\.ApiCatalogV1$",
+    (strict_semantic_type) = "schema-name"
+  ];
+
+  // Team responsible for governance of this contract.
+  string owner = 3 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^platform-contracts$",
+    (strict_semantic_type) = "governing-owner"
+  ];
+
+  // Contract versions intentionally supported by this endpoint.
+  repeated string supported_contract_versions = 4 [
+    (strict_required) = true,
+    (strict_min_items) = 1,
+    (strict_string_pattern) = "^api-catalog\\.v1$",
+    (strict_semantic_type) = "supported-contract-version"
+  ];
+}
+
+// Contract metadata returned with every api-catalog.v2 response.
+message ApiCatalogContractMetadataV2 {
+  option (strict_contract) = "api-catalog.v2";
+
+  // Concrete response contract version.
+  string contract_version = 1 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^api-catalog\\.v2$",
+    (strict_semantic_type) = "contract-version"
+  ];
+
+  // Fully qualified service name that owns this response shape.
+  string schema_name = 2 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^api_catalog\\.ApiCatalogV2$",
+    (strict_semantic_type) = "schema-name"
+  ];
+
+  // Team responsible for governance of this contract.
+  string owner = 3 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^platform-contracts$",
+    (strict_semantic_type) = "governing-owner"
+  ];
+
+  // Contract versions intentionally supported by this endpoint.
+  repeated string supported_contract_versions = 4 [
+    (strict_required) = true,
+    (strict_min_items) = 2,
+    (strict_string_pattern) = "^api-catalog\\.v[12]$",
+    (strict_semantic_type) = "supported-contract-version"
+  ];
+}
+
+// A single catalog entry returned by api-catalog.v1.
+message ApiCatalogEntryV1 {
+  option (strict_contract) = "api-catalog.v1";
+
+  reserved 4 to 15;
+  reserved "label", "description", "lifecycle", "lifecycle_status";
+
+  // Stable governed identifier for the API style.
+  ApiCatalogEntryKindV1 entry_kind = 1 [
+    (strict_required) = true,
+    (strict_semantic_type) = "governed-api-kind"
+  ];
+
+  // Human-readable display name constrained to the v1 value set.
+  string display_name = 2 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^(REST|SOAP|gRPC|GraphQL|Webhook|WebSocket)$",
+    (strict_semantic_type) = "display-name"
+  ];
+
+  // Integration scenario this API style is intended to support.
+  string integration_use_case = 3 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^[A-Z][A-Za-z0-9 -]+$",
+    (strict_semantic_type) = "business-use-case"
+  ];
+}
+
+// A single catalog entry returned by api-catalog.v2.
+message ApiCatalogEntryV2 {
+  option (strict_contract) = "api-catalog.v2";
+
+  reserved 5 to 15;
+  reserved "label", "description";
+
+  // Stable governed identifier for the API style.
+  ApiCatalogEntryKindV2 entry_kind = 1 [
+    (strict_required) = true,
+    (strict_semantic_type) = "governed-api-kind"
+  ];
+
+  // Human-readable display name constrained to the v2 value set.
+  string display_name = 2 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^(REST|SOAP|gRPC|GraphQL|Webhook|WebSocket|AsyncAPI)$",
+    (strict_semantic_type) = "display-name"
+  ];
+
+  // Integration scenario this API style is intended to support.
+  string integration_use_case = 3 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^[A-Z][A-Za-z0-9 -]+$",
+    (strict_semantic_type) = "business-use-case"
+  ];
+
+  // Lifecycle label that tells clients whether the domain value is stable or emerging.
+  string lifecycle_status = 4 [
+    (strict_required) = true,
+    (strict_string_pattern) = "^(stable|emerging)$",
+    (strict_semantic_type) = "domain-lifecycle"
+  ];
+}
+
+// Response from ApiCatalogV1.ListCatalogEntries.
+message ListApiCatalogEntriesV1Response {
+  option (strict_contract) = "api-catalog.v1";
+
+  // Governance metadata for the v1 response shape.
+  ApiCatalogContractMetadataV1 metadata = 1 [
+    (strict_required) = true,
+    (strict_semantic_type) = "response-metadata"
+  ];
+
+  // Catalog entries governed by api-catalog.v1.
+  repeated ApiCatalogEntryV1 catalog_entries = 2 [
+    (strict_required) = true,
+    (strict_min_items) = 1,
+    (strict_semantic_type) = "catalog-entries"
+  ];
+}
+
+// Response from ApiCatalogV2.ListCatalogEntries.
+message ListApiCatalogEntriesV2Response {
+  option (strict_contract) = "api-catalog.v2";
+
+  // Governance metadata for the v2 response shape.
+  ApiCatalogContractMetadataV2 metadata = 1 [
+    (strict_required) = true,
+    (strict_semantic_type) = "response-metadata"
+  ];
+
+  // Catalog entries governed by api-catalog.v2.
+  repeated ApiCatalogEntryV2 catalog_entries = 2 [
+    (strict_required) = true,
+    (strict_min_items) = 1,
+    (strict_semantic_type) = "catalog-entries"
+  ];
 }
