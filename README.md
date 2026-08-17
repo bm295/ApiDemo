@@ -19,6 +19,34 @@ This project targets `.NET 9`.
 
 Open http://localhost:5089 and choose an API type from the home page. The gRPC demo uses a separate local HTTP/2 endpoint at http://localhost:5090 for the real gRPC calls and exposes v1/v2 contract bridge routes.
 
+## Run behind Envoy
+
+The included Docker Compose topology starts two API instances and an Envoy load
+balancer. Envoy exposes one public listener and routes requests by protocol:
+
+- HTTP/1.1, Razor Pages, REST, SOAP, GraphQL, webhook, and WebSocket traffic goes
+  to port `5089` on each API instance.
+- Requests whose `content-type` starts with `application/grpc` go to the HTTP/2
+  listener on port `5090`.
+- WebSocket upgrades on `/ws` pass through the same public listener.
+
+Start the topology with:
+
+```bash
+docker compose up --build
+```
+
+Open http://localhost:8080 for the application. Envoy's administration endpoint
+is available only on the host loopback interface at http://localhost:9901. The
+application instances are not published to the host.
+
+The application exposes `GET /healthz` for Envoy's active HTTP health checks.
+Compose sets `ApiDemo__BindAddress=0.0.0.0`, but it does not publish the backend
+ports to the host. Envoy supplies `X-Forwarded-For` and `X-Forwarded-Proto`, and
+Compose enables their processing with `ApiDemo__TrustForwardedHeaders=true`.
+Without these settings, direct `dotnet run` keeps its loopback-only behavior and
+does not trust proxy headers.
+
 `dotnet build` also runs a strict gRPC contract verifier. The build fails if the generated service names, RPC signatures, message fields, enum values, or embedded strict metadata drift from the governed schema.
 
 ## Design Doc

@@ -1,0 +1,33 @@
+services:
+  api-demo-1:
+    build:
+      context: .
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ApiDemo__BindAddress: 0.0.0.0
+      ApiDemo__TrustForwardedHeaders: "true"
+    expose:
+      - "5089"
+      - "5090"
+
+  api-demo-2:
+    build:
+      context: .
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ApiDemo__BindAddress: 0.0.0.0
+      ApiDemo__TrustForwardedHeaders: "true"
+    expose:
+      - "5089"
+      - "5090"
+
+  envoy:
+    image: envoyproxy/envoy:v1.35-latest
+    depends_on:
+      - api-demo-1
+      - api-demo-2
+    ports:
+      - "8080:8080"
+      - "127.0.0.1:9901:9901"
+    volumes:
+      - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
