@@ -29,12 +29,14 @@ public sealed class RestApiDemoEndpoints : IApiDemoEndpointMapper
 
     public void Map(RouteGroupBuilder api)
     {
-        api.MapGet("/messages", (HttpRequest request, IMessageService service) =>
+        var messages = api.MapGroup("/messages").RequireAuthorization("RetailerAccess");
+
+        messages.MapGet("", (HttpRequest request, IMessageService service) =>
         {
             return Results.Ok(BuildCollection(service.GetAll(), request));
         });
 
-        api.MapGet("/messages/{id:int}", (HttpRequest request, int id, IMessageService service) =>
+        messages.MapGet("/{id:int}", (HttpRequest request, int id, IMessageService service) =>
         {
             var message = service.GetById(id);
             return message is null
@@ -42,7 +44,7 @@ public sealed class RestApiDemoEndpoints : IApiDemoEndpointMapper
                 : Results.Ok(BuildResource(message, request));
         });
 
-        api.MapPost("/messages", async (HttpContext context, IMessageService service) =>
+        messages.MapPost("", async (HttpContext context, IMessageService service) =>
         {
             var payload = await ReadPayloadAsync(context);
             if (payload.ErrorResult is not null)
@@ -64,7 +66,7 @@ public sealed class RestApiDemoEndpoints : IApiDemoEndpointMapper
             return Results.Created($"/api/messages/{message.Id}", resource);
         });
 
-        api.MapPut("/messages/{id:int}", async (HttpContext context, int id, IMessageService service) =>
+        messages.MapPut("/{id:int}", async (HttpContext context, int id, IMessageService service) =>
         {
             var payload = await ReadPayloadAsync(context);
             if (payload.ErrorResult is not null)
@@ -89,7 +91,7 @@ public sealed class RestApiDemoEndpoints : IApiDemoEndpointMapper
             return Results.Ok(BuildResource(message, context.Request));
         });
 
-        api.MapDelete("/messages/{id:int}", (int id, IMessageService service) =>
+        messages.MapDelete("/{id:int}", (int id, IMessageService service) =>
         {
             return service.Delete(id)
                 ? Results.NoContent()

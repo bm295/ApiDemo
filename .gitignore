@@ -26,6 +26,12 @@ TestResults/
 *.nupkg
 *.snupkg
 packages/
+!.nuget/local/*.nupkg
+
+# Local SQLite store created by the message API
+api-demo.db
+api-demo.db-shm
+api-demo.db-wal
 
 # Frontend caches/deps (optional for mixed repos)
 node_modules/

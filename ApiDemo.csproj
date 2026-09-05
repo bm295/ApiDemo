@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -15,6 +15,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Cqrs.RetailerIsolation.EfCore" Version="1.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,6 +29,8 @@
     <None Remove="ApiDemo.Tests/**/*.cs" />
     <Compile Remove="ApiDemo.Core/**/*.cs" />
     <None Remove="ApiDemo.Core/**/*.cs" />
+    <Content Remove="ApiDemo.Tests/**" />
+    <Content Remove="ApiDemo.Core/**" />
   </ItemGroup>
 
   <ItemGroup>

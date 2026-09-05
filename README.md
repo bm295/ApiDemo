@@ -15,9 +15,13 @@ dotnet restore
 dotnet run
 ```
 
-This project targets `.NET 9`.
+This project targets `.NET 10`.
 
 Open http://localhost:5089 and choose an API type from the home page. The gRPC demo uses a separate local HTTP/2 endpoint at http://localhost:5090 for the real gRPC calls and exposes v1/v2 contract bridge routes.
+
+## Message API authentication
+
+`/api/messages` uses JWT Bearer authentication and requires a `retailer_id` claim containing a UUID. Configure `Authentication__Jwt__SigningKey` as an environment secret; the issuer and audience default to `ApiDemo` and `ApiDemoClients` in `appsettings.json`. Tokens are expected from a trusted issuer—the application does not issue tokens from a caller-provided retailer ID.
 
 ## Run behind Envoy
 
