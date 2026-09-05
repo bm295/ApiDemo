@@ -31,6 +31,41 @@ public sealed class RestApiDemoEndpoints : IApiDemoEndpointMapper
     {
         var messages = api.MapGroup("/messages").RequireAuthorization("RetailerAccess");
 
+        messages.MapGet("/analytics/windows", (int m, decimal d, IMessageService service) =>
+        {
+            if (m <= 0)
+            {
+                return Results.BadRequest(new { error = "m must be greater than zero." });
+            }
+
+            var orderedMessages = service.GetAll()
+                .OrderBy(message => message.CreatedUtc)
+                .ThenBy(message => message.Id)
+                .ToArray();
+
+            var amounts = new decimal[orderedMessages.Length];
+            for (var index = 0; index < orderedMessages.Length; index++)
+            {
+                if (!TryGetAmount(orderedMessages[index], out amounts[index]))
+                {
+                    return Results.UnprocessableEntity(new
+                    {
+                        error = "Every message in the analysis must have a numeric attributes.amount value.",
+                        messageId = orderedMessages[index].Id
+                    });
+                }
+            }
+
+            var count = MessageWindowAnalytics.CountWindowsWithSum(amounts, m, d);
+            return Results.Ok(new
+            {
+                windowLength = m,
+                targetAmount = d,
+                messageCount = orderedMessages.Length,
+                matchingWindowCount = count
+            });
+        });
+
         messages.MapGet("", (HttpRequest request, IMessageService service) =>
         {
             return Results.Ok(BuildCollection(service.GetAll(), request));
@@ -389,6 +424,14 @@ public sealed class RestApiDemoEndpoints : IApiDemoEndpointMapper
         {
             target[property.Key] = property.Value?.DeepClone();
         }
+    }
+
+    private static bool TryGetAmount(ApiMessage message, out decimal amount)
+    {
+        amount = default;
+        return message.Attributes.TryGetPropertyValue("amount", out var node)
+            && node is JsonValue value
+            && value.TryGetValue(out amount);
     }
 
     private sealed record RestPayload(string? Text, JsonObject Attributes, IResult? ErrorResult);

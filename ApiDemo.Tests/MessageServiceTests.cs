@@ -10,6 +10,25 @@ namespace ApiDemo.Tests;
 public sealed class MessageServiceTests
 {
     [Fact]
+    public void CountWindowsWithSum_CountsOverlappingContiguousWindows()
+    {
+        var count = MessageWindowAnalytics.CountWindowsWithSum([1m, 2m, 1m, 2m, 3m], 2, 3m);
+
+        Assert.Equal(3, count);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(4)]
+    public void CountWindowsWithSum_ReturnsZeroForAnInvalidWindowLength(int windowLength)
+    {
+        var count = MessageWindowAnalytics.CountWindowsWithSum([1m, 2m, 3m], windowLength, 3m);
+
+        Assert.Equal(0, count);
+    }
+
+    [Fact]
     public void AddAfterDelete_UsesANewId()
     {
         using var store = TestStore.Create();

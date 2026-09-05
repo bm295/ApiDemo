@@ -12,7 +12,7 @@ This repository is rewritten as a C# web application that demonstrates multiple 
 
 ```bash
 dotnet restore
-dotnet run
+dotnet run --project ApiDemo.Api
 ```
 
 This project targets `.NET 10`.
@@ -57,7 +57,7 @@ does not trust proxy headers.
 
 The solution is split into three projects:
 
-- `ApiDemo` contains the ASP.NET Core host, API endpoint mappers, Razor Pages, WebSocket routes, and gRPC transport code.
+- `ApiDemo.Api` contains the ASP.NET Core host, API endpoint mappers, Razor Pages, WebSocket routes, persistence, and gRPC transport code.
 - `ApiDemo.Core` contains the reusable domain model and service layer (`Models/ApiMessage.cs`, `Services/MessageService.cs`, and `Services/WebhookLogger.cs`).
 - `ApiDemo.Tests` contains the xUnit tests for the core service behavior.
 
@@ -67,6 +67,6 @@ Run the complete test suite with:
 dotnet test ApiDemo.sln
 ```
 
-## Design Doc
+## Documentation
 
-See `docs/design-class-interactions.md` for the class interaction guide and request-flow overview.
+The `docs` folder contains supporting design notes and implementation guides for the application.

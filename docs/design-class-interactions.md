@@ -46,7 +46,7 @@ ApiDemo.Core/
 |- Models/ApiMessage.cs         -> shared REST data model
 `- Services/*                   -> reusable message and webhook services
 
-ApiDemo/Services/Grpc/
+ApiDemo.Api/Services/Grpc/
 `- *                            -> strict gRPC contract runtime and build verification
 
 ApiDemo.Tests/
@@ -329,7 +329,7 @@ Think of `api_catalog.proto` as the source of truth for the strict gRPC side of 
 
 At build time:
 
-1. `ApiDemo.csproj` includes `Protos/api_catalog.proto` with `GrpcServices="Both"`.
+1. `ApiDemo.Api/ApiDemo.Api.csproj` includes `Protos/api_catalog.proto` with `GrpcServices="Both"`.
 2. The protobuf/gRPC tooling generates:
    - server base classes
    - client classes
@@ -737,7 +737,7 @@ sequenceDiagram
 
 Main classes:
 
-- `ApiDemo.csproj`
+- `ApiDemo.Api/ApiDemo.Api.csproj`
 - `Program.cs`
 - `ApiCatalogBuildVerifier`
 - `ApiCatalogContract`
