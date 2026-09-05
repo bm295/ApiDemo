@@ -21,12 +21,18 @@
     <Protobuf Include="Protos/api_catalog.proto" GrpcServices="Both" />
   </ItemGroup>
 
-  <Target
-    Name="VerifyGrpcContract"
-    AfterTargets="Build"
-    Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipGrpcContractVerification)' != 'true'">
-    <Exec
-      Command="dotnet exec --roll-forward Major &quot;$(TargetDir)$(AssemblyName).dll&quot; --verify-grpc-contract"
-      WorkingDirectory="$(ProjectDir)" />
+  <ItemGroup>
+    <Compile Remove="ApiDemo.Tests/**/*.cs" />
+    <None Remove="ApiDemo.Tests/**/*.cs" />
+    <Compile Remove="ApiDemo.Core/**/*.cs" />
+    <None Remove="ApiDemo.Core/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="ApiDemo.Core\ApiDemo.Core.csproj" />
+  </ItemGroup>
+
+  <Target Name="VerifyGrpcContract" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true' and '$(SkipGrpcContractVerification)' != 'true'">
+    <Exec Command="dotnet exec --roll-forward Major &quot;$(TargetDir)$(AssemblyName).dll&quot; --verify-grpc-contract" WorkingDirectory="$(ProjectDir)" />
   </Target>
 </Project>

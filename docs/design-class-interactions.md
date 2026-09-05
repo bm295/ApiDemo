@@ -42,13 +42,15 @@ Pages/
 |- Demo.cshtml                  -> renders the selected demo view
 `- DemoLogic/*                  -> one page handler per API style
 
-Services/
-|- MessageService.cs            -> in-memory state for REST demos
-|- WebhookLogger.cs             -> file logger for webhook demos
-`- Grpc/*                       -> strict gRPC contract runtime and build verification
+ApiDemo.Core/
+|- Models/ApiMessage.cs         -> shared REST data model
+`- Services/*                   -> reusable message and webhook services
 
-Models/
-`- ApiMessage.cs                -> shared data model for REST and GraphQL request parsing
+ApiDemo/Services/Grpc/
+`- *                            -> strict gRPC contract runtime and build verification
+
+ApiDemo.Tests/
+`- MessageServiceTests.cs       -> characterization and boundary tests for the core service
 
 Protos/
 `- api_catalog.proto            -> source of the generated gRPC contract types
@@ -815,8 +817,8 @@ No manual registration is needed because both endpoint mappers and page handlers
 
 The normal edit path is:
 
-1. `Models/ApiMessage.cs`
-2. `Services/MessageService.cs`
+1. `ApiDemo.Core/Models/ApiMessage.cs`
+2. `ApiDemo.Core/Services/MessageService.cs`
 3. `Endpoints/ApiTypes/RestApiDemoEndpoints.cs`
 4. `Pages/DemoLogic/RestDemoPageHandler.cs`
 
@@ -849,7 +851,7 @@ If you are new to the repo, read in this order:
 2. `Endpoints/ApiEndpoints.cs`
 3. `Pages/Demo.cshtml.cs`
 4. `Endpoints/ApiTypes/RestApiDemoEndpoints.cs`
-5. `Services/MessageService.cs`
+5. `ApiDemo.Core/Services/MessageService.cs`
 6. `Endpoints/ApiTypes/GrpcApiDemoEndpoints.cs`
 7. `Services/Grpc/ApiCatalogGrpcService.cs`
 8. `Services/Grpc/ApiCatalogContract.cs`

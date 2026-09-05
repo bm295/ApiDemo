@@ -81,9 +81,12 @@ public sealed class RestApiDemoEndpoints : IApiDemoEndpointMapper
             }
 
             var message = service.Update(id, payload.Text, payload.Attributes);
-            return message is null
-                ? Results.NotFound(new { error = "Message not found." })
-                : Results.Ok(BuildResource(message, context.Request));
+            if (message is null)
+            {
+                return Results.NotFound(new { error = "Message not found." });
+            }
+
+            return Results.Ok(BuildResource(message, context.Request));
         });
 
         api.MapDelete("/messages/{id:int}", (int id, IMessageService service) =>

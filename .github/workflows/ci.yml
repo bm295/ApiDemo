@@ -1,0 +1,62 @@
+name: .NET CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore ApiDemo.sln
+
+      - name: Build
+        run: dotnet build ApiDemo.sln --no-restore --configuration Release
+
+      - name: Test with code coverage
+        run: >-
+          dotnet test ApiDemo.sln
+          --no-build
+          --configuration Release
+          --collect:"XPlat Code Coverage"
+          --results-directory ./TestResults
+          --logger "trx;LogFileName=test-results.trx"
+
+      - name: Generate coverage report
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          reportgenerator \
+            -reports:"TestResults/**/coverage.cobertura.xml" \
+            -targetdir:"TestResults/coverage-report" \
+            -reporttypes:"MarkdownSummaryGithub"
+
+      - name: Publish test and coverage summary
+        if: always()
+        run: |
+          if [ -f TestResults/coverage-report/SummaryGithub.md ]; then
+            cat TestResults/coverage-report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Coverage report was not generated." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload test and coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-and-coverage-results
+          path: TestResults

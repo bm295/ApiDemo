@@ -49,6 +49,20 @@ does not trust proxy headers.
 
 `dotnet build` also runs a strict gRPC contract verifier. The build fails if the generated service names, RPC signatures, message fields, enum values, or embedded strict metadata drift from the governed schema.
 
+## Project Structure
+
+The solution is split into three projects:
+
+- `ApiDemo` contains the ASP.NET Core host, API endpoint mappers, Razor Pages, WebSocket routes, and gRPC transport code.
+- `ApiDemo.Core` contains the reusable domain model and service layer (`Models/ApiMessage.cs`, `Services/MessageService.cs`, and `Services/WebhookLogger.cs`).
+- `ApiDemo.Tests` contains the xUnit tests for the core service behavior.
+
+Run the complete test suite with:
+
+```bash
+dotnet test ApiDemo.sln
+```
+
 ## Design Doc
 
 See `docs/design-class-interactions.md` for the class interaction guide and request-flow overview.
