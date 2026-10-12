@@ -6,6 +6,7 @@ using FunctionalProgramming.Infrastructure.Persistence;
 using Cqrs.RetailerIsolation;
 using System.Net;
 using System.Text;
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -39,7 +40,20 @@ builder.Services.AddRazorPages();
 builder.Services.AddGrpc();
 var jwtIssuer = builder.Configuration["Authentication:Jwt:Issuer"] ?? throw new InvalidOperationException("Authentication:Jwt:Issuer is required.");
 var jwtAudience = builder.Configuration["Authentication:Jwt:Audience"] ?? throw new InvalidOperationException("Authentication:Jwt:Audience is required.");
-var jwtSigningKey = builder.Configuration["Authentication:Jwt:SigningKey"] ?? throw new InvalidOperationException("Authentication:Jwt:SigningKey is required.");
+var jwtSigningKey = builder.Configuration["Authentication:Jwt:SigningKey"];
+var usesTemporaryDevelopmentKey = false;
+if (string.IsNullOrWhiteSpace(jwtSigningKey))
+{
+    if (!builder.Environment.IsDevelopment())
+    {
+        throw new InvalidOperationException("Authentication:Jwt:SigningKey is required. Configure Authentication__Jwt__SigningKey or user secrets.");
+    }
+
+    // Local API demos can start without a configured token issuer. This random
+    // key lasts for this process only; never use a shared fallback in production.
+    jwtSigningKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+    usesTemporaryDevelopmentKey = true;
+}
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -73,6 +87,10 @@ builder.Services.AddScoped<IMessageService, EfMessageService>();
 builder.Services.AddSingleton<IWebhookLogger, WebhookLogger>();
 
 var app = builder.Build();
+if (usesTemporaryDevelopmentKey)
+{
+    app.Logger.LogWarning("Using a temporary development JWT signing key. Configure Authentication:Jwt:SigningKey to validate tokens from your issuer; the temporary key changes on restart.");
+}
 
 using (var scope = app.Services.CreateScope())
 {
@@ -105,6 +123,7 @@ app.UseWebSockets();
 app.MapGet("/healthz", () => Results.Ok(new { status = "healthy" }));
 app.MapGrpcService<FunctionalProgramming.Services.Grpc.ApiCatalogV1GrpcService>();
 app.MapGrpcService<FunctionalProgramming.Services.Grpc.ApiCatalogV2GrpcService>();
+app.MapGrpcService<ReportStreamingGrpcService>();
 app.MapApiEndpoints();
 app.MapWebSocketEndpoints();
 app.MapRazorPages();

@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <Protobuf Include="Protos/api_catalog.proto" GrpcServices="Both" />
+    <Protobuf Include="Protos/report_stream.proto" GrpcServices="Both" />
   </ItemGroup>
 
   <ItemGroup>

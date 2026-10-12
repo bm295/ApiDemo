@@ -1,0 +1,20 @@
+syntax = "proto3";
+option csharp_namespace = "FunctionalProgramming.Grpc";
+package report_stream;
+
+// Demonstrates progress updates for a simulated report export.
+service ReportStreaming {
+  rpc StreamReportProgress (ReportProgressRequest) returns (stream ReportProgressUpdate);
+}
+
+message ReportProgressRequest {
+  string report_name = 1;
+}
+
+message ReportProgressUpdate {
+  string report_name = 1;
+  int32 sequence = 2;
+  int32 percent_complete = 3;
+  string status = 4;
+  bool completed = 5;
+}

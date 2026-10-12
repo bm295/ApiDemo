@@ -44,6 +44,74 @@ else if (Model.IsGrpcDemo)
     <h3>Response</h3>
     <pre id="grpc-response">@Model.GrpcResponseExample</pre>
 
+    <h3>Server streaming: report export progress</h3>
+    <p>This simulated export sends five updates about one second apart. Applications include job progress, telemetry feeds, and incremental query results.</p>
+    <p>Browser → HTTP bridge → gRPC service over HTTP/2. The bridge forwards each Protobuf message as a JSON line immediately.</p>
+    <button id="grpc-stream-start" type="button">Start streaming</button>
+    <button id="grpc-stream-stop" type="button" disabled>Stop streaming</button>
+    <progress id="grpc-stream-progress" max="100" value="0" aria-label="Report export progress"></progress>
+    <pre id="grpc-stream-response" aria-live="polite">Ready to stream report progress.</pre>
+
+    <script>
+        (function () {
+            const start = document.getElementById('grpc-stream-start');
+            const stop = document.getElementById('grpc-stream-stop');
+            const output = document.getElementById('grpc-stream-response');
+            const progress = document.getElementById('grpc-stream-progress');
+            let controller;
+            stop.addEventListener('click', () => controller?.abort());
+            start.addEventListener('click', async () => {
+                controller = new AbortController();
+                start.disabled = true;
+                stop.disabled = false;
+                output.textContent = '';
+                progress.value = 0;
+                let completed = false;
+                function showLine(line) {
+                    if (!line.trim()) return;
+                    const update = JSON.parse(line);
+                    if (update.error) throw new Error(update.error);
+                    progress.value = update.percentComplete ?? 0;
+                    output.textContent += `${update.sequence}. ${update.percentComplete ?? 0}% - ${update.status}\n`;
+                    completed = update.completed === true;
+                }
+                try {
+                    const response = await fetch('/api/grpc/stream', { signal: controller.signal });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    if (!response.body) throw new Error('Streaming response is unavailable.');
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let pending = '';
+                    try {
+                        while (true) {
+                            const { value, done } = await reader.read();
+                            pending += done ? decoder.decode() : decoder.decode(value, { stream: true });
+                            const lines = pending.split('\n');
+                            pending = lines.pop();
+                            lines.forEach(showLine);
+                            if (done) {
+                                showLine(pending);
+                                break;
+                            }
+                        }
+                    } finally {
+                        await reader.cancel();
+                        reader.releaseLock();
+                    }
+                    if (!completed) throw new Error('Stream ended before the report completed.');
+                    output.textContent += 'Stream completed.\n';
+                } catch (error) {
+                    output.textContent += error.name === 'AbortError'
+                        ? 'Stream stopped.\n' : `Stream failed: ${error.message}\n`;
+                } finally {
+                    controller = null;
+                    start.disabled = false;
+                    stop.disabled = true;
+                }
+            });
+        })();
+    </script>
+
     <script>
         (function () {
             const buttons = document.querySelectorAll('.grpc-send-btn');

@@ -1,4 +1,4 @@
-# API Demo Hub (C# ASP.NET Core, .NET 9)
+# API Demo Hub (C# ASP.NET Core, .NET 10)
 
 This repository is rewritten as a C# web application that demonstrates multiple API styles:
 - REST
@@ -17,7 +17,29 @@ dotnet run --project ApiDemo.Api
 
 This project targets `.NET 10`.
 
+The default launch profile uses `Development`. If no JWT signing key is configured,
+the app generates a temporary random key for that process so local demos can start.
+To validate tokens from your issuer, set `Authentication__Jwt__SigningKey` to the
+issuer's key. Other environments require an explicitly configured key.
+
 Open http://localhost:5089 and choose an API type from the home page. The gRPC demo uses a separate local HTTP/2 endpoint at http://localhost:5090 for the real gRPC calls and exposes v1/v2 contract bridge routes.
+
+## gRPC server streaming example
+
+Open `/Demo/grpc` and click **Start streaming** to follow a simulated monthly
+report export: five progress messages from 0% to 100%, about one second apart.
+**Stop streaming** cancels the HTTP request and the underlying gRPC call.
+This illustrates progress monitoring for long-running jobs; no report file is generated.
+
+`Protos/report_stream.proto` defines `ReportStreaming.StreamReportProgress` with
+`returns (stream ReportProgressUpdate)`. The service writes each update using
+`IServerStreamWriter`; the .NET client reads updates using `ResponseStream.ReadAllAsync`.
+See the [ASP.NET Core streaming documentation](https://learn.microsoft.com/en-us/aspnet/core/grpc/services?view=aspnetcore-10.0).
+
+The browser calls `GET /api/grpc/stream`, an HTTP bridge that calls the real gRPC
+service on port 5090 and flushes each update as NDJSON. The page includes a .NET
+client example for calling the gRPC service directly. Existing unary v1/v2 catalog
+examples remain available. The catalog build verifier covers the catalog contracts.
 
 ## Message API authentication
 
