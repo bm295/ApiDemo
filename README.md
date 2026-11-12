@@ -92,3 +92,10 @@ dotnet test ApiDemo.sln
 ## Documentation
 
 The `docs` folder contains supporting design notes and implementation guides for the application.
+
+## Message Insight Agent
+
+A bounded, read-only agent can search/count messages within the authenticated retailer via
+`POST /api/agent/message-insights`. Runs offline in explicit demo mode, or uses a configured
+chat-completions-compatible model for natural-language planning. Returns bounded evidence,
+execution steps and a trace ID. See [setup, architecture and limitations](docs/message-insight-agent.md).
