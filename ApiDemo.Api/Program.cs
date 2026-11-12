@@ -1,4 +1,6 @@
 using FunctionalProgramming.Services.Grpc;
+using FunctionalProgramming.Agents;
+using FunctionalProgramming.Services.Agents;
 using FunctionalProgramming.Endpoints;
 using FunctionalProgramming.Services;
 using FunctionalProgramming.Services.Authentication;
@@ -86,6 +88,17 @@ builder.Services.AddDbContext<ApiDemoDbContext>((serviceProvider, options) =>
 builder.Services.AddScoped<IMessageService, EfMessageService>();
 builder.Services.AddSingleton<IWebhookLogger, WebhookLogger>();
 
+builder.Services.AddScoped<IMessageInsightReader, EfMessageInsightReader>();
+var agentMode = builder.Configuration["Agent:Mode"] ?? "demo";
+if (agentMode == "model")
+{
+    builder.Services.AddHttpClient<IInsightPlanner, HttpInsightPlanner>(client => client.Timeout = TimeSpan.FromSeconds(10))
+        .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+}
+else if (agentMode == "demo") builder.Services.AddScoped<IInsightPlanner, DemoInsightPlanner>();
+else throw new InvalidOperationException("Agent:Mode must be demo or model.");
+builder.Services.AddScoped<MessageInsightAgent>();
+
 var app = builder.Build();
 if (usesTemporaryDevelopmentKey)
 {
@@ -125,6 +138,7 @@ app.MapGrpcService<FunctionalProgramming.Services.Grpc.ApiCatalogV1GrpcService>(
 app.MapGrpcService<FunctionalProgramming.Services.Grpc.ApiCatalogV2GrpcService>();
 app.MapGrpcService<ReportStreamingGrpcService>();
 app.MapApiEndpoints();
+app.MapMessageInsightEndpoints();
 app.MapWebSocketEndpoints();
 app.MapRazorPages();
 
